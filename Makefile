@@ -111,11 +111,16 @@ check:
 	done
 	@echo "==> packaging inputs"
 	@for input in Packaging/DEBIAN/control Packaging/grok.entitlements \
-		Packaging/grok.launcher.sh Packaging/release-notes.md; do \
+		Packaging/grok.launcher.sh Packaging/release-notes.md \
+		Packaging/etc/grok/managed_config.toml Scripts/check-skill-policy.sh; do \
 		test -f "$(ROOT_DIR)/$$input" || { echo "error: missing $$input" >&2; exit 66; }; \
 	done
 	@plutil -lint "$(ROOT_DIR)/Packaging/grok.entitlements"
 	@"$(ROOT_DIR)/Scripts/release-notes.sh" "v$(PACKAGE_VERSION)" >/dev/null
+	@echo "==> skill policy"
+	@bash -n "$(ROOT_DIR)/Scripts/check-skill-policy.sh"
+	@"$(ROOT_DIR)/Scripts/check-skill-policy.sh" --self-test \
+		--config "$(ROOT_DIR)/Packaging/etc/grok/managed_config.toml"
 	@echo "ok"
 
 source:

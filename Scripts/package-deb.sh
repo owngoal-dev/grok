@@ -32,8 +32,10 @@ package_id="${PACKAGE_ID:-wiki.qaq.grok}"
 control_template="$repository_root/Packaging/DEBIAN/control"
 entitlements="$repository_root/Packaging/${PROGRAM}.entitlements"
 launcher_template="$repository_root/Packaging/${PROGRAM}.launcher.sh"
+system_config="$repository_root/Packaging/etc/grok/managed_config.toml"
+skill_policy_check="$repository_root/Scripts/check-skill-policy.sh"
 
-for input in "$control_template" "$entitlements" "$launcher_template"; do
+for input in "$control_template" "$entitlements" "$launcher_template" "$system_config" "$skill_policy_check"; do
     [[ -f "$input" ]] || { echo "error: missing packaging input: $input" >&2; exit 66; }
 done
 
@@ -70,10 +72,13 @@ debian="$staging/DEBIAN"
 installed_root="$staging$install_prefix"
 installed_libexec="$installed_root/usr/libexec/$PROGRAM"
 installed_launcher="$installed_root/usr/bin/$PROGRAM"
-mkdir -p "$debian" "$(dirname "$installed_libexec")" "$(dirname "$installed_launcher")"
+installed_system_config="$installed_root/etc/grok/managed_config.toml"
+mkdir -p "$debian" "$(dirname "$installed_libexec")" "$(dirname "$installed_launcher")" "$(dirname "$installed_system_config")"
 
 /usr/bin/ditto "$payload" "$installed_libexec"
 sed -e "s|@PREFIX@|$install_prefix|g" "$launcher_template" >"$installed_launcher"
+/usr/bin/ditto "$system_config" "$installed_system_config"
+chmod 0644 "$installed_system_config"
 
 chmod 0755 "$installed_launcher" "$installed_libexec/$PROGRAM"
 chmod -R a+rX "$installed_libexec"
@@ -140,12 +145,19 @@ dpkg-deb --root-owner-group -Zzstd -b "$staging" "$temporary_deb" >/dev/null
 contents="$(dpkg-deb --contents "$temporary_deb")"
 for path in \
     "$install_prefix/usr/bin/$PROGRAM" \
-    "$install_prefix/usr/libexec/$PROGRAM/$PROGRAM"; do
+    "$install_prefix/usr/libexec/$PROGRAM/$PROGRAM" \
+    "$install_prefix/etc/grok/managed_config.toml"; do
     grep -qF ".$path" <<<"$contents" || {
         echo "error: package is missing $path" >&2
         exit 65
     }
 done
+if grep -q 'SKILL.md' <<<"$contents"; then
+    echo "error: package contains extra skill trees (SKILL.md)" >&2
+    grep 'SKILL.md' <<<"$contents" | sed 's/^/       /' >&2
+    exit 65
+fi
+"$skill_policy_check" --config "$installed_system_config" --tree "$installed_root" --payload "$payload"
 
 mv -f "$temporary_deb" "$output_deb"
 echo "packaged $package_id $version ($architecture, prefix '${install_prefix:-/}'): $output_deb"

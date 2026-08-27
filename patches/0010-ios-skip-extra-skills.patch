@@ -1,0 +1,99 @@
+diff --git a/crates/codegen/xai-grok-agent/src/prompt/skills.rs b/crates/codegen/xai-grok-agent/src/prompt/skills.rs
+index 14424c1..746374d 100644
+--- a/crates/codegen/xai-grok-agent/src/prompt/skills.rs
++++ b/crates/codegen/xai-grok-agent/src/prompt/skills.rs
+@@ -104,10 +104,14 @@ pub async fn list_skills_with_plugins(
+         &config.server_skill_dirs,
+         SkillScope::Server,
+     ));
+-    skills.extend(collect_injected_skills(
+-        &config.bundled_skill_dirs,
+-        SkillScope::Bundled,
+-    ));
++    // Desktop platform bundles (docx/pptx/xlsx/imagine, …) are not required
++    // for grok as a coding agent on iOS and add open-file load.
++    if !cfg!(target_os = "ios") {
++        skills.extend(collect_injected_skills(
++            &config.bundled_skill_dirs,
++            SkillScope::Bundled,
++        ));
++    }
+ 
+     let mut skills = filter_skills(skills, &config.ignore);
+     skills.sort_by_key(|s| s.scope);
+@@ -319,13 +323,15 @@ async fn list_skills_with_options(
+         );
+     }
+ 
+-    let bundled_dir = global_dir.join("bundled");
+-    collect_discovered_paths(
+-        find_skill_paths(&bundled_dir),
+-        SkillScope::Bundled,
+-        &mut seen_canonical_paths,
+-        &mut skill_files,
+-    );
++    if !cfg!(target_os = "ios") {
++        let bundled_dir = global_dir.join("bundled");
++        collect_discovered_paths(
++            find_skill_paths(&bundled_dir),
++            SkillScope::Bundled,
++            &mut seen_canonical_paths,
++            &mut skill_files,
++        );
++    }
+ 
+     parse_skill_files(skill_files)
+ }
+diff --git a/crates/codegen/xai-grok-shell/src/agent/mvp_agent/mod.rs b/crates/codegen/xai-grok-shell/src/agent/mvp_agent/mod.rs
+index 5cc3851..eab754a 100644
+--- a/crates/codegen/xai-grok-shell/src/agent/mvp_agent/mod.rs
++++ b/crates/codegen/xai-grok-shell/src/agent/mvp_agent/mod.rs
+@@ -2221,6 +2221,9 @@ impl MvpAgent {
+     ///    racing concurrent extracts that would interleave per-file writes
+     ///    against `~/.grok/bundled/` and the manifest.
+     pub(crate) fn maybe_sync_bundle_in_background(&self, force: bool) {
++        if cfg!(target_os = "ios") {
++            return;
++        }
+         use crate::extensions::bundle::{
+             BUNDLE_SYNC_TTL, bundle_cache_is_fresh, has_bundle_credentials,
+             maybe_sync_bundle_to_root,
+diff --git a/crates/codegen/xai-grok-shell/src/config/watcher.rs b/crates/codegen/xai-grok-shell/src/config/watcher.rs
+index e0a5664..bbadf0a 100644
+--- a/crates/codegen/xai-grok-shell/src/config/watcher.rs
++++ b/crates/codegen/xai-grok-shell/src/config/watcher.rs
+@@ -685,12 +685,19 @@ impl SkillsFileWatcher {
+         // per-session discovery gating happens downstream, so watching a
+         // currently-disabled vendor dir is harmless (a change just re-runs the
+         // gated discovery) and avoids ever missing a watch if a toggle flips.
++        let mut compat = xai_grok_tools::types::compat::CompatConfig::default();
++        // iOS skips Claude/Cursor watches so vendor skill trees cannot add
++        // open-file load; `.grok` / `.agents` / $GROK_HOME stay.
++        if cfg!(target_os = "ios") {
++            compat.claude.skills = false;
++            compat.cursor.skills = false;
++        }
+         let dirs_to_watch = xai_grok_agent::prompt::skills::collect_skill_config_dirs(
+             cwd,
+             monorepo_user_dir,
+             &grok_home,
+             config_paths,
+-            xai_grok_tools::types::compat::CompatConfig::default(),
++            compat,
+         );
+         let project_root = cwd.map(crate::session::workflow::registry::project_root);
+         Self::start_with_dirs(&dirs_to_watch, &grok_home, project_root.as_deref())
+diff --git a/crates/codegen/xai-grok-shell/src/extensions/bundle.rs b/crates/codegen/xai-grok-shell/src/extensions/bundle.rs
+index 04f8f4b..ffa6fca 100644
+--- a/crates/codegen/xai-grok-shell/src/extensions/bundle.rs
++++ b/crates/codegen/xai-grok-shell/src/extensions/bundle.rs
+@@ -209,6 +209,9 @@ pub(crate) async fn sync_bundle_to_root(
+     alpha_test_key: Option<&str>,
+     _force: bool,
+ ) -> anyhow::Result<BundleSyncResult> {
++    if cfg!(target_os = "ios") {
++        anyhow::bail!("platform bundled skills are not installed on iOS");
++    }
+     if !has_bundle_credentials(auth_manager, deployment_key) {
+         anyhow::bail!(NO_BUNDLE_CREDENTIALS_ERROR);
+     }

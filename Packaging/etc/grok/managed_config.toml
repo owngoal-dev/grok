@@ -1,0 +1,12 @@
+# OwnGoal Studio defaults for jailbroken iOS.
+# This is the system managed-config layer (RootHide's `.jbroot/etc/grok/managed_config.toml`
+# or rootless `/var/jb/etc/grok/managed_config.toml`). User `$GROK_HOME/config.toml`
+# overrides it. Local `$GROK_HOME` skills remain usable.
+
+# Desktop vendor skill trees are not required for grok as a coding agent on
+# iOS and default-watching them adds open-file load.
+[compat.claude]
+skills = false
+
+[compat.cursor]
+skills = false
