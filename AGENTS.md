@@ -141,8 +141,11 @@ vendor/nono/                 pinned nono 0.53.0 with the unsupported-OS dedup ke
   OSC 52 for Linux/SSH/tmux/containers and otherwise trusts the native leg,
   but a command-line process has no pasteboard on iOS — `arboard`'s non-macOS
   backend is X11/Wayland and has nothing to connect to — so a copy silently
-  went nowhere. The terminal emulator (iGhostty) writes the pasteboard from
+  went nowhere. The terminal emulator (iGhostVT) writes the pasteboard from
   the sequence; the native leg is off so no X11 connect is attempted.
+- `TERM_PROGRAM=iGhostVT` / `iGhostty` maps to the Ghostty terminal brand
+  (`patches/0012`): it is libghostty's core, and an unknown brand made the
+  copy feedback call a delivered OSC 52 write a failure.
 - `make install` — install on an attached device and run `--version`.
   Over USB: `iproxy 4422:2222 &`
 
