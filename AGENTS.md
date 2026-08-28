@@ -102,6 +102,7 @@ Configuration/upstream.env   pinned ref, cargo package/bin, iOS floor, rustc
 Configuration/version.txt    package version
 patches/NNNN-*.patch         applied in sorted order to a pristine checkout
 Packaging/DEBIAN/control     control template (@PLACEHOLDER@ substituted)
+Packaging/etc/grok/managed_config.toml  system defaults (vendor scans off, desktop bundles ignored)
 Packaging/grok.entitlements  what the signed binary carries, and why
 Packaging/grok.launcher.sh   /usr/bin/grok → the real binary in libexec
 Scripts/prepare-source.sh    fetch + patch (idempotent, stamped)
@@ -146,6 +147,11 @@ vendor/nono/                 pinned nono 0.53.0 with the unsupported-OS dedup ke
 - `TERM_PROGRAM=iGhostVT` / `iGhostty` maps to the Ghostty terminal brand
   (`patches/0012`): it is libghostty's core, and an unknown brand made the
   copy feedback call a delivered OSC 52 write a failure.
+- Ship desktop-only bundled skill names (Office, game-asset, resume-from-other-
+  agents) in `Packaging/etc/grok/managed_config.toml` under `[skills] ignore`
+  and `disabled`. Do not vendor those trees or add them via `[skills] paths`;
+  iOS does not provide them. Keep the lists even though `patches/0010` skips
+  bundled discovery, so a re-extracted `~/.grok/bundled/` cache stays inert.
 - `make install` — install on an attached device and run `--version`.
   Over USB: `iproxy 4422:2222 &`
 

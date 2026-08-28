@@ -10,3 +10,32 @@ skills = false
 
 [compat.cursor]
 skills = false
+
+# Desktop platform bundles (Office, game-asset, resume-from-other-agents) are
+# not provided on a jailbroken iOS coding-agent install. Keep them ignored if
+# grok re-extracts the bundled cache.
+[skills]
+ignore = [
+  "~/.grok/bundled/skills/pptx",
+  "~/.grok/bundled/skills/pdf",
+  "~/.grok/bundled/skills/docx",
+  "~/.grok/bundled/skills/game-animation-frames",
+  "~/.grok/bundled/skills/game-asset-core",
+  "~/.grok/bundled/skills/game-character-consistency",
+  "~/.grok/bundled/skills/game-tilesets",
+  "~/.grok/bundled/skills/game-ui-icons",
+  "~/.grok/bundled/skills/resume-claude",
+  "~/.grok/bundled/skills/resume-cursor",
+]
+disabled = [
+  "pptx",
+  "pdf",
+  "docx",
+  "game-animation-frames",
+  "game-asset-core",
+  "game-character-consistency",
+  "game-tilesets",
+  "game-ui-icons",
+  "resume-claude",
+  "resume-cursor",
+]
