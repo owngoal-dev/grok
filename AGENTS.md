@@ -137,6 +137,12 @@ vendor/nono/                 pinned nono 0.53.0 with the unsupported-OS dedup ke
 - On iOS, skip `dark-light` desktop detection and continue through the existing
   environment/OSC 11 chain; dark-light's unsupported-target API has a different
   return type and no meaningful iOS system appearance result.
+- On iOS the clipboard route is OSC 52 only (`patches/0011`). Upstream emits
+  OSC 52 for Linux/SSH/tmux/containers and otherwise trusts the native leg,
+  but a command-line process has no pasteboard on iOS — `arboard`'s non-macOS
+  backend is X11/Wayland and has nothing to connect to — so a copy silently
+  went nowhere. The terminal emulator (iGhostty) writes the pasteboard from
+  the sequence; the native leg is off so no X11 connect is attempted.
 - `make install` — install on an attached device and run `--version`.
   Over USB: `iproxy 4422:2222 &`
 

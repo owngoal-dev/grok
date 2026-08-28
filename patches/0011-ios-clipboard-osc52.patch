@@ -1,0 +1,27 @@
+diff --git a/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs b/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs
+index 47d9013..24b9e16 100644
+--- a/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs
++++ b/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs
+@@ -166,15 +166,21 @@ fn resolve_clipboard_route_with(ctx: &TerminalContext, opts: ClipboardRouteOpts)
+     // macOS/Windows: only in tmux/SSH/container contexts, or when an
+     // upstream `grok wrap` sink is capturing our output and will forward
+     // the sequence to the real clipboard.
++    // iOS: OSC 52 is the only route. A command-line process has no
++    // pasteboard of its own there (arboard's non-macOS backend is X11/Wayland
++    // and has nothing to connect to), so the terminal emulator must carry
++    // the copy — the same shape as Linux, minus the native leg.
+     // `GROK_CLIPBOARD_NO_OSC52` wins over every automatic path.
++    let is_ios = cfg!(target_os = "ios");
+     let osc52 = !opts.no_osc52
+         && (cfg!(target_os = "linux")
++            || is_ios
+             || is_tmux
+             || is_remote()
+             || is_container_no_display()
+             || opts.wrap_sink);
+     ClipboardRoute {
+-        native: true,
++        native: !is_ios,
+         tmux_buffer: is_tmux,
+         osc52,
+         // Editor :terminal's immediate emulator is libvterm, not tmux — don't wrap there.
