@@ -1,9 +1,8 @@
 diff --git a/crates/codegen/xai-grok-pager-render/src/theme/system_appearance.rs b/crates/codegen/xai-grok-pager-render/src/theme/system_appearance.rs
 --- a/crates/codegen/xai-grok-pager-render/src/theme/system_appearance.rs
 +++ b/crates/codegen/xai-grok-pager-render/src/theme/system_appearance.rs
-@@ -112,6 +112,10 @@
- /// before SSH. Must not consult env hints — those may be a previous wrap
- /// hop's snapshot.
+@@ -89,6 +89,10 @@ fn resolve_appearance_chain(
+ /// Must not consult env hints; those may be a previous wrap hop's snapshot.
  #[must_use]
  pub fn detect_desktop() -> Option<SystemAppearance> {
 +    #[cfg(target_os = "ios")]

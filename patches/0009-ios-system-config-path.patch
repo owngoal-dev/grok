@@ -1,8 +1,7 @@
 diff --git a/crates/codegen/xai-grok-config/src/paths.rs b/crates/codegen/xai-grok-config/src/paths.rs
-index 369739b..4ab4789 100644
 --- a/crates/codegen/xai-grok-config/src/paths.rs
 +++ b/crates/codegen/xai-grok-config/src/paths.rs
-@@ -23,6 +23,26 @@ pub fn grok_application_in(home: &std::path::Path) -> PathBuf {
+@@ -21,6 +21,26 @@ pub fn grok_application_in(home: &std::path::Path) -> PathBuf {
  
  /// System-wide config directory: `/etc/grok/` on Unix, `None` on Windows.
  pub fn system_config_dir() -> Option<PathBuf> {

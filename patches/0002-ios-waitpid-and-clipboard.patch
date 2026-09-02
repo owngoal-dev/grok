@@ -11,11 +11,10 @@ diff --git a/Cargo.toml b/Cargo.toml
  
  [workspace]
  resolver = "2"
-
 diff --git a/crates/codegen/xai-grok-shared/Cargo.toml b/crates/codegen/xai-grok-shared/Cargo.toml
 --- a/crates/codegen/xai-grok-shared/Cargo.toml
 +++ b/crates/codegen/xai-grok-shared/Cargo.toml
-@@ -45,13 +45,12 @@
+@@ -45,13 +45,12 @@ objc2 = "0.6.3"
  # `wayland-data-control` makes arboard set the Wayland selection through the
  # compositor-side data-control protocol (no surface, no focus) instead of the
  # focus-mediated XWayland bridge; no-op off Linux (target-gated inside arboard).

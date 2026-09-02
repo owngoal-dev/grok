@@ -63,6 +63,11 @@ cargo_home="$scratch_dir/cargo-home"
 mkdir -p "$cargo_home"
 export CARGO_HOME="$cargo_home"
 export CARGO_TARGET_DIR="$scratch_dir/target"
+# rustc embeds source paths (panic locations, debug info) for the checkout and
+# every registry crate. Remap them so the binary does not carry the build
+# machine's directories. Upstream sets no rustflags for the iOS target, so
+# exporting RUSTFLAGS drops nothing.
+export RUSTFLAGS="${RUSTFLAGS:-} --remap-path-prefix=$src_dir=/src --remap-path-prefix=$scratch_dir=/build"
 
 # Release builds embed ripgrep in both the tools and shell crates. Upstream has
 # no ios-aarch64 release asset, so build the exact version those crates declare

@@ -1,25 +1,20 @@
 diff --git a/crates/codegen/xai-grok-config/src/shell.rs b/crates/codegen/xai-grok-config/src/shell.rs
 --- a/crates/codegen/xai-grok-config/src/shell.rs
 +++ b/crates/codegen/xai-grok-config/src/shell.rs
-@@ -356,9 +356,14 @@
- //   3. `which::which(name)` — walks `$PATH`. Catches NixOS profile shells in
- //      `/nix/store/...` or `/etc/profiles/per-user/<u>/bin/` when `/bin/bash`
- //      is absent.
--//   4. A fixed candidate list: `{/bin, /usr/bin, /usr/local/bin,
--//      /opt/homebrew/bin} × {bash,zsh}`.
--//   5. Hardcoded `/bin/<name>` — historical behavior, only reached when every
-+//   4. On iOS, paths below `.jbroot` beside the running Mach-O. RootHide adds
-+//      that link to each directory containing a Mach-O, pointing at the
-+//      randomized jailbreak root.
-+//   5. A fixed candidate list: `{/var/jb/bin, /var/jb/usr/bin, /bin, /usr/bin,
-+//      /usr/local/bin, /opt/homebrew/bin} × {bash,zsh}`. `/var/jb` is probed
-+//      first because a rootless bootstrap has no `/bin/sh` at all, and a
-+//      Rust binary is not libvroot-linked so unprefixed paths stay on rootfs.
-+//   6. Hardcoded `/bin/<name>` — historical behavior, only reached when every
- //      earlier step has failed.
+@@ -329,8 +329,10 @@ fn invocation_for(shell: &WindowsShell, command: &str) -> ShellInvocation {
+ //      There the user's login shell already lives at the resolved path (e.g. `/run/current-system/sw/bin/bash`, `/opt/homebrew/bin/bash`).
+ //   3. `which::which(name)` walks `$PATH`.
+ //      Catches NixOS profile shells in `/nix/store/...` or `/etc/profiles/per-user/<u>/bin/` when `/bin/bash` is absent
+-//   4. A fixed candidate list: `{/bin, /usr/bin, /usr/local/bin, /opt/homebrew/bin} × {bash,zsh}`.
+-//   5. Hardcoded `/bin/<name>`: historical behavior, only reached when every earlier step has failed.
++//   4. On iOS, paths below `.jbroot` beside the running Mach-O. RootHide adds that link to each directory containing a Mach-O, pointing at the randomized jailbreak root.
++//   5. A fixed candidate list: `{/var/jb/bin, /var/jb/usr/bin, /bin, /usr/bin, /usr/local/bin, /opt/homebrew/bin} × {bash,zsh}`.
++//      `/var/jb` is probed first because a rootless bootstrap has no `/bin/sh` at all, and a Rust binary is not libvroot-linked so unprefixed paths stay on rootfs.
++//   6. Hardcoded `/bin/<name>`: historical behavior, only reached when every earlier step has failed.
  //
- // The result is cached per kind in a process-wide `OnceLock`, so the cascade
-@@ -449,10 +454,34 @@
+ // The result is cached per kind in a process-wide `OnceLock`, so the cascade is run at most once per shell kind per process
+ 
+@@ -418,15 +420,39 @@ fn resolve_unix_shell_path(kind: UnixShellKind) -> String {
          return p.to_string_lossy().into_owned();
      }
  
@@ -56,9 +51,9 @@ diff --git a/crates/codegen/xai-grok-config/src/shell.rs b/crates/codegen/xai-gr
              return p.to_string_lossy().into_owned();
          }
      }
-@@ -460,4 +489,4 @@
--    // 5) Hardcoded fallback — same as historical behavior. Spawn will fail at
-+    // 6) Hardcoded fallback — same as historical behavior. Spawn will fail at
-     //    runtime on a pure NixOS host with no bash, but that's no worse than
-     //    before this resolver existed.
+ 
+-    // 5) Hardcoded fallback, same as historical behavior. Spawn will fail at runtime on a pure NixOS host with no bash.
++    // 6) Hardcoded fallback, same as historical behavior. Spawn will fail at runtime on a pure NixOS host with no bash.
      kind.hardcoded_default().to_string()
+ }
+ 

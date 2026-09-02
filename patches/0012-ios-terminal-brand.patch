@@ -1,9 +1,8 @@
 diff --git a/crates/codegen/xai-grok-pager-render/src/terminal/mod.rs b/crates/codegen/xai-grok-pager-render/src/terminal/mod.rs
-index 9345223..1ba2a7c 100644
 --- a/crates/codegen/xai-grok-pager-render/src/terminal/mod.rs
 +++ b/crates/codegen/xai-grok-pager-render/src/terminal/mod.rs
-@@ -1021,7 +1021,9 @@ fn terminal_name_from_term_program(value: &str) -> Option<TerminalName> {
-
+@@ -926,7 +926,9 @@ fn terminal_name_from_term_program(value: &str) -> Option<TerminalName> {
+ 
      match normalized.as_str() {
          "appleterminal" => Some(TerminalName::AppleTerminal),
 -        "ghostty" => Some(TerminalName::Ghostty),

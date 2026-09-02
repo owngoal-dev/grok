@@ -29,12 +29,16 @@ execute the same code.
 - **`CLAUDE.md` is a symlink to `AGENTS.md`**, never a file of its own. One
   set of notes, two names; `make check` enforces it.
 - **Review for sensitive information before anything is uploaded or
-  published.** `scripts/check-sensitive.sh` scans tracked files, the staged
-  package tree and the finished `.deb`s for credentials, private keys, home
-  and scratch paths, device identifiers, IP addresses and e-mail addresses.
-  `make check`, `package-deb.sh` and the Release workflow all run it and
-  stop on a hit. A deliberate public value goes on its allowlist; a rule is
-  never loosened.
+  published.** This is a reading job, not a regex. Before a push, a tag or
+  a release, have an agent (a subagent is fine) read the diff, the staged
+  package tree and `strings` of the built binary for credentials, private
+  keys, home or scratch paths, device identifiers and addresses. Nothing
+  goes out until that read comes back clean. There is deliberately no
+  script for this.
+- **Published packages come from the Release workflow only.** Local
+  `make debs` must keep working, to prove a build and to `make install` on a
+  device, but a `.deb` built on a laptop is never uploaded or attached to a
+  release: push the tag and let CI build, sign, review and publish.
 
 ## libvroot is not our problem, and not our solution
 
@@ -115,6 +119,7 @@ packaging/etc/grok/managed_config.toml  system defaults (vendor scans off, deskt
 packaging/grok.entitlements  what the signed binary carries, and why
 packaging/grok.launcher.sh   /usr/bin/grok → the real binary in libexec
 scripts/prepare-source.sh    fetch + patch (idempotent, stamped)
+scripts/rebase-patches.sh    re-target patches/ at a new upstream sha
 scripts/build-ios.sh         cargo --target aarch64-apple-ios, verify Mach-O
 scripts/package-deb.sh       stage + ldid + dpkg-deb + verify
 scripts/install-device.sh    install over SSH and smoke-test (dev only)
@@ -126,6 +131,11 @@ vendor/nono/                 pinned nono 0.53.0 with the unsupported-OS dedup ke
 
 - `make check` — script syntax, config sanity, patch set, packaging inputs
 - `make source` — fetch + patch; fails loudly if a patch no longer applies
+- `make rebase-patches REF=<sha>` — when `make source` or `Follow upstream`
+  fails on a patch: fuzz-applies `patches/` onto `<sha>` in `build/rebase` and
+  lists the `*.rej`. Fix those by hand in `build/rebase` (usually reflowed
+  comments), delete the `.rej`, rerun with `WRITE=1` to rewrite and re-verify
+  `patches/`, then move the pin (`scripts/follow-upstream.sh`) and `make check`.
 - `make build` — cross-compile and verify the Mach-O is iOS
 - `make debs` — both packages plus `SHA256SUMS`; what CI releases
 - Release runners must install DotSlash before `make debs`; the pinned
