@@ -4,10 +4,10 @@
 # stable @xai-official/grok npm release. xai-org/grok-build intentionally has
 # no release tags, so the crate's lockstepped version is the source-side join.
 #
-#   Scripts/follow-upstream.sh           # update Configuration/ if newer
-#   Scripts/follow-upstream.sh --check   # exit 1 when a newer stable exists
-#   Scripts/follow-upstream.sh --dry-run # print the candidate, change nothing
-#   Scripts/follow-upstream.sh --print   # one line: version source-sha
+#   scripts/follow-upstream.sh           # update configuration/ if newer
+#   scripts/follow-upstream.sh --check   # exit 1 when a newer stable exists
+#   scripts/follow-upstream.sh --dry-run # print the candidate, change nothing
+#   scripts/follow-upstream.sh --print   # one line: version source-sha
 
 set -Eeuo pipefail
 
@@ -28,8 +28,8 @@ case "${1:-}" in
 esac
 
 repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-# shellcheck source=../Configuration/upstream.env
-source "$repository_root/Configuration/upstream.env"
+# shellcheck source=../configuration/upstream.env
+source "$repository_root/configuration/upstream.env"
 
 : "${UPSTREAM_REPO:?}"
 : "${UPSTREAM_REF:?}"
@@ -39,7 +39,7 @@ for tool in git npm python3; do
     command -v "$tool" >/dev/null || { echo "error: $tool is not installed" >&2; exit 69; }
 done
 
-current_version="$(tr -d '[:space:]' <"$repository_root/Configuration/version.txt")"
+current_version="$(tr -d '[:space:]' <"$repository_root/configuration/version.txt")"
 current_upstream_version="${current_version%%-*}"
 upstream_version="$(npm view @xai-official/grok@latest version --json | python3 -c 'import json,sys; print(json.load(sys.stdin))')"
 [[ "$upstream_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
@@ -121,7 +121,7 @@ if [[ "$mode" == "dry-run" ]]; then
     exit 0
 fi
 
-python3 - "$repository_root/Configuration/upstream.env" "$upstream_ref" "$candidate_toolchain" <<'PY'
+python3 - "$repository_root/configuration/upstream.env" "$upstream_ref" "$candidate_toolchain" <<'PY'
 from pathlib import Path
 import sys
 
@@ -141,6 +141,6 @@ if missing:
     raise SystemExit(f"{path} is missing: {', '.join(sorted(missing))}")
 path.write_text("".join(lines))
 PY
-"$repository_root/Scripts/apply-version.sh" "$upstream_version"
+"$repository_root/scripts/apply-version.sh" "$upstream_version"
 make -C "$repository_root" source
 echo "ready to tag v$upstream_version"

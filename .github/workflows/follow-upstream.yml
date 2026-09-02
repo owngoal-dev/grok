@@ -1,4 +1,4 @@
-# Every Monday, map the newest stable official npm release back to its public
+# Every day, map the newest stable official npm release back to its public
 # xai-org/grok-build source sync. Build both iOS layouts before atomically
 # pushing the pin commit and release tag.
 
@@ -6,7 +6,8 @@ name: Follow upstream
 
 on:
   schedule:
-    - cron: "0 0 * * 1"
+    # Daily 00:00 UTC, ahead of OwnGoalPackages' 04:00 UTC fetch.
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
@@ -34,8 +35,8 @@ jobs:
         run: |
           current_version="$(make --no-print-directory print-version)"
           echo "current $current_version @ $(make --no-print-directory print-upstream)"
-          ./Scripts/follow-upstream.sh
-          if git diff --quiet -- Configuration/upstream.env Configuration/version.txt; then
+          ./scripts/follow-upstream.sh
+          if git diff --quiet -- configuration/upstream.env configuration/version.txt; then
             echo "changed=false" >>"$GITHUB_ENV"
             tag="v${current_version}"
             if git rev-parse "refs/tags/${tag}^{commit}" >/dev/null 2>&1 &&
@@ -88,7 +89,7 @@ jobs:
         if: env.publish == 'true'
         id: rust
         run: |
-          toolchain="$(sed -n 's/^RUST_TOOLCHAIN=//p' Configuration/upstream.env)"
+          toolchain="$(sed -n 's/^RUST_TOOLCHAIN=//p' configuration/upstream.env)"
           test -n "$toolchain"
           echo "toolchain=$toolchain" >>"$GITHUB_OUTPUT"
 
@@ -117,7 +118,7 @@ jobs:
         run: |
           git config user.name "bot"
           git config user.email "bot@owngoal.dev"
-          git add Configuration/upstream.env Configuration/version.txt
+          git add configuration/upstream.env configuration/version.txt
           git commit -m "Bump upstream to v${new_version}
 
           xai-org/grok-build ${new_ref}
@@ -131,7 +132,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="v${new_version}"
-          ./Scripts/release-notes.sh "$tag" >/tmp/release-notes.md
+          ./scripts/release-notes.sh "$tag" >/tmp/release-notes.md
           gh release create "$tag" \
             --title "grok $tag" \
             --notes-file /tmp/release-notes.md \

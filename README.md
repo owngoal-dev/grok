@@ -56,7 +56,7 @@ make install
 
 ## Upstream tracking
 
-The weekly workflow checks the official npm `latest` version each Monday,
+The daily workflow checks the official npm `latest` version every day,
 maps it to the matching public source commit, replays the complete iOS patch
 stack, and publishes only after both packages pass the release build. It never
 downgrades a pin that is already newer than the stable npm channel.

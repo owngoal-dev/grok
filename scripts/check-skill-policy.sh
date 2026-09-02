@@ -2,7 +2,7 @@
 #
 # Fail if a Grok staging tree, payload, or shipped system config would install
 # extra skill trees, omit the desktop-skill ignore/disabled defaults, or add
-# those skills via [skills] paths. Used by make check and Scripts/package-deb.sh.
+# those skills via [skills] paths. Used by make check and scripts/package-deb.sh.
 
 set -Eeuo pipefail
 

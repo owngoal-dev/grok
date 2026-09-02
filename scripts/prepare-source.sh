@@ -17,11 +17,11 @@ work_dir="$1"
 repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 patch_dir="$repository_root/patches"
 
-# shellcheck source=../Configuration/upstream.env
-source "$repository_root/Configuration/upstream.env"
+# shellcheck source=../configuration/upstream.env
+source "$repository_root/configuration/upstream.env"
 
-: "${UPSTREAM_REPO:?Configuration/upstream.env must set UPSTREAM_REPO}"
-: "${UPSTREAM_REF:?Configuration/upstream.env must set UPSTREAM_REF}"
+: "${UPSTREAM_REPO:?configuration/upstream.env must set UPSTREAM_REPO}"
+: "${UPSTREAM_REF:?configuration/upstream.env must set UPSTREAM_REF}"
 
 [[ -d "$patch_dir" ]] || { echo "error: missing patches directory: $patch_dir" >&2; exit 66; }
 

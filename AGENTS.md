@@ -6,13 +6,13 @@ agent — built for jailbroken iOS 15+ and installed as `grok`, for both
 
 This repository holds **no application source**. It fetches grok-build at a
 pinned commit, applies `patches/`, cross-compiles for `aarch64-apple-ios`, and
-packages. Everything runs through `Scripts/`, so CI and a local checkout
+packages. Everything runs through `scripts/`, so CI and a local checkout
 execute the same code.
 
 ## Hard rules
 
 - **Not a fork.** Never vendor grok-build source here. Every change to it is a
-  patch in `patches/`, applied by `Scripts/prepare-source.sh` to a fresh
+  patch in `patches/`, applied by `scripts/prepare-source.sh` to a fresh
   checkout of `UPSTREAM_REF`. Keep patches small and single-purpose.
 - **`UPSTREAM_REF` is a full commit sha**, not a branch. Bump with
   `make bump-upstream REF=…`.
@@ -23,13 +23,13 @@ execute the same code.
 - **Never hardcode a bootstrap path in patched source.** Probe for the file and
   take the first that exists. Prefix substitution belongs in *packaging*
   (`@PREFIX@`), not in Rust.
-- **Versions live in `Configuration/version.txt` only.** `X.Y.Z` tracks
+- **Versions live in `configuration/version.txt` only.** `X.Y.Z` tracks
   upstream's crate version; `X.Y.Z-N` is a packaging-only respin.
 - **Do not link libvroot into this binary.** See below.
 - **`CLAUDE.md` is a symlink to `AGENTS.md`**, never a file of its own. One
   set of notes, two names; `make check` enforces it.
 - **Review for sensitive information before anything is uploaded or
-  published.** `Scripts/check-sensitive.sh` scans tracked files, the staged
+  published.** `scripts/check-sensitive.sh` scans tracked files, the staged
   package tree and the finished `.deb`s for credentials, private keys, home
   and scratch paths, device identifiers, IP addresses and e-mail addresses.
   `make check`, `package-deb.sh` and the Release workflow all run it and
@@ -107,17 +107,17 @@ or collapse the later fallbacks.
 ## Layout
 
 ```
-Configuration/upstream.env   pinned ref, cargo package/bin, iOS floor, rustc
-Configuration/version.txt    package version
+configuration/upstream.env   pinned ref, cargo package/bin, iOS floor, rustc
+configuration/version.txt    package version
 patches/NNNN-*.patch         applied in sorted order to a pristine checkout
-Packaging/DEBIAN/control     control template (@PLACEHOLDER@ substituted)
-Packaging/etc/grok/managed_config.toml  system defaults (vendor scans off, desktop bundles ignored)
-Packaging/grok.entitlements  what the signed binary carries, and why
-Packaging/grok.launcher.sh   /usr/bin/grok → the real binary in libexec
-Scripts/prepare-source.sh    fetch + patch (idempotent, stamped)
-Scripts/build-ios.sh         cargo --target aarch64-apple-ios, verify Mach-O
-Scripts/package-deb.sh       stage + ldid + dpkg-deb + verify
-Scripts/install-device.sh    install over SSH and smoke-test (dev only)
+packaging/DEBIAN/control     control template (@PLACEHOLDER@ substituted)
+packaging/etc/grok/managed_config.toml  system defaults (vendor scans off, desktop bundles ignored)
+packaging/grok.entitlements  what the signed binary carries, and why
+packaging/grok.launcher.sh   /usr/bin/grok → the real binary in libexec
+scripts/prepare-source.sh    fetch + patch (idempotent, stamped)
+scripts/build-ios.sh         cargo --target aarch64-apple-ios, verify Mach-O
+scripts/package-deb.sh       stage + ldid + dpkg-deb + verify
+scripts/install-device.sh    install over SSH and smoke-test (dev only)
 build/                       everything generated; not source
 vendor/nono/                 pinned nono 0.53.0 with the unsupported-OS dedup key fix
 ```
@@ -157,7 +157,7 @@ vendor/nono/                 pinned nono 0.53.0 with the unsupported-OS dedup ke
   (`patches/0012`): it is libghostty's core, and an unknown brand made the
   copy feedback call a delivered OSC 52 write a failure.
 - Ship desktop-only bundled skill names (Office, game-asset, resume-from-other-
-  agents) in `Packaging/etc/grok/managed_config.toml` under `[skills] ignore`
+  agents) in `packaging/etc/grok/managed_config.toml` under `[skills] ignore`
   and `disabled`. Do not vendor those trees or add them via `[skills] paths`;
   iOS does not provide them. Keep the lists even though `patches/0010` skips
   bundled discovery, so a re-extracted `~/.grok/bundled/` cache stays inert.
