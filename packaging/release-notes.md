@@ -11,7 +11,7 @@ The architecture field names the **bootstrap layout, not the CPU**. Both package
 
 Not sure? Ask the device: `dpkg --print-architecture`.
 
-Requires **iOS @MIN_IOS_MAJOR@ or later** and a bootstrap that provides a shell. Or add the [OwnGoal Studio repository](https://github.com/OwnGoalStudio/OwnGoalPackages) and let your package manager pick.
+Requires **iOS @MIN_IOS_MAJOR@ or later** and a bootstrap that provides a shell. Or add the [OwnGoal Studio repository](https://github.com/owngoal-dev/OwnGoalPackages) and let your package manager pick.
 
 ## Usage
 
@@ -19,8 +19,8 @@ Run `grok` in a terminal on device. Authenticate with an xAI API key or the brow
 
 ## About this build
 
-Upstream [`xai-org/grok-build@@UPSTREAM_SHORT@`](https://github.com/xai-org/grok-build/commit/@UPSTREAM_REF@), plus the patches that port it to a jailbroken iOS userspace. The binary is a Rust executable: it is **not** linked with libvroot, so it has to probe for the bootstrap's shell instead of trusting `/bin/sh`. See [`patches/`](https://github.com/OwnGoalStudio/grok/tree/@TAG@/patches).
+Upstream [`xai-org/grok-build@@UPSTREAM_SHORT@`](https://github.com/xai-org/grok-build/commit/@UPSTREAM_REF@), plus the patches that port it to a jailbroken iOS userspace. The binary is a Rust executable: it is **not** linked with libvroot, so it has to probe for the bootstrap's shell instead of trusting `/bin/sh`. See [`patches/`](https://github.com/owngoal-dev/grok/tree/@TAG@/patches).
 
 Verify your download against `SHA256SUMS`.
 
-**Full changelog**: https://github.com/OwnGoalStudio/grok/commits/@TAG@
+**Full changelog**: https://github.com/owngoal-dev/grok/commits/@TAG@
