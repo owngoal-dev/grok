@@ -90,7 +90,6 @@ set-version:
 	@"$(VERSION_APPLIER)" "$(VERSION)"
 
 check:
-	@python3 "$(ROOT_DIR)/scripts/check-launcher.py" "$(ROOT_DIR)/packaging/grok.launcher.sh"
 	@echo "==> shell syntax"
 	@for script in "$(ROOT_DIR)"/scripts/*.sh; do bash -n "$$script" || exit 1; done
 	@if command -v shellcheck >/dev/null; then \
@@ -112,7 +111,7 @@ check:
 	done
 	@echo "==> packaging inputs"
 	@for input in packaging/DEBIAN/control packaging/grok.entitlements \
-		packaging/grok.launcher.sh packaging/release-notes.md \
+		packaging/grok.launcher.c packaging/release-notes.md \
 		packaging/etc/grok/managed_config.toml scripts/check-skill-policy.sh; do \
 		test -f "$(ROOT_DIR)/$$input" || { echo "error: missing $$input" >&2; exit 66; }; \
 	done

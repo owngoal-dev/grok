@@ -31,11 +31,11 @@ source "$repository_root/configuration/upstream.env"
 package_id="${PACKAGE_ID:-wiki.qaq.grok}"
 control_template="$repository_root/packaging/DEBIAN/control"
 entitlements="$repository_root/packaging/${PROGRAM}.entitlements"
-launcher_template="$repository_root/packaging/${PROGRAM}.launcher.sh"
+launcher_source="$repository_root/packaging/${PROGRAM}.launcher.c"
 system_config="$repository_root/packaging/etc/grok/managed_config.toml"
 skill_policy_check="$repository_root/scripts/check-skill-policy.sh"
 
-for input in "$control_template" "$entitlements" "$launcher_template" "$system_config" "$skill_policy_check"; do
+for input in "$control_template" "$entitlements" "$launcher_source" "$system_config" "$skill_policy_check"; do
     [[ -f "$input" ]] || { echo "error: missing packaging input: $input" >&2; exit 66; }
 done
 
@@ -53,7 +53,7 @@ iphoneos-arm64:/var/jb | iphoneos-arm64e:) ;;
 *) echo "error: architecture and install prefix name different bootstrap layouts" >&2; exit 64 ;;
 esac
 
-for tool in ldid dpkg-deb; do
+for tool in ldid dpkg-deb xcrun vtool; do
     command -v "$tool" >/dev/null || { echo "error: $tool is not installed" >&2; exit 69; }
 done
 
@@ -81,27 +81,20 @@ installed_system_config="$installed_root/etc/grok/managed_config.toml"
 mkdir -p "$debian" "$(dirname "$installed_libexec")" "$(dirname "$installed_launcher")" "$(dirname "$installed_system_config")"
 
 /usr/bin/ditto "$payload" "$installed_libexec"
-sed -e "s|@PREFIX@|$install_prefix|g" "$launcher_template" >"$installed_launcher"
+sdk_path="$(xcrun --sdk iphoneos --show-sdk-path)"
+xcrun clang -target "arm64-apple-ios$MIN_IOS" -isysroot "$sdk_path" -Os -fvisibility=hidden \
+    "-DOG_PROGRAM=\"$PROGRAM\"" "-DOG_STATIC_PREFIX=\"$install_prefix\"" \
+    "$launcher_source" -Wl,-dead_strip -o "$installed_launcher"
 /usr/bin/ditto "$system_config" "$installed_system_config"
 chmod 0644 "$installed_system_config"
 
 chmod 0755 "$installed_launcher" "$installed_libexec/$PROGRAM"
 chmod -R a+rX "$installed_libexec"
 
-head -n1 "$installed_launcher" | grep -qxF "#!$install_prefix/bin/sh" || {
-    echo "error: launcher interpreter is not $install_prefix/bin/sh" >&2
-    exit 65
-}
-grep -qF "exec $install_prefix/usr/libexec/$PROGRAM/$PROGRAM \"\$@\"" "$installed_launcher" || {
-    echo "error: launcher does not exec the installed binary" >&2
-    exit 65
-}
-if grep -q '@PREFIX@' "$installed_launcher"; then
-    echo "error: launcher still holds an unsubstituted @PREFIX@" >&2
-    exit 65
-fi
-
-ldid -S"$entitlements" -Cadhoc "$installed_libexec/$PROGRAM"
+vtool -show-build "$installed_launcher" 2>/dev/null | grep -qE '^ *platform (IOS|2)$'
+for executable in "$installed_launcher" "$installed_libexec/$PROGRAM"; do
+    ldid -S"$entitlements" -Cadhoc "$executable"
+done
 shopt -s nullglob
 for library in "$installed_libexec"/*.dylib; do
     ldid -S -Cadhoc "$library"
@@ -109,23 +102,24 @@ for library in "$installed_libexec"/*.dylib; do
 done
 shopt -u nullglob
 
-ldid -e "$installed_libexec/$PROGRAM" >"$signed_entitlements"
-
 require_true() {
     [[ "$(/usr/libexec/PlistBuddy -c "Print :$1" "$signed_entitlements" 2>/dev/null || true)" == true ]] || {
         echo "error: signed binary is missing entitlement: $1" >&2
         exit 65
     }
 }
-require_true platform-application
-require_true com.apple.private.security.no-sandbox
-require_true com.apple.private.security.storage.AppBundles
-require_true com.apple.private.security.storage.AppDataContainers
-[[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.private.security.container-required' \
-    "$signed_entitlements" 2>/dev/null || true)" == false ]] || {
-    echo "error: signed binary needs com.apple.private.security.container-required = false" >&2
-    exit 65
-}
+for executable in "$installed_launcher" "$installed_libexec/$PROGRAM"; do
+    ldid -e "$executable" >"$signed_entitlements"
+    require_true platform-application
+    require_true com.apple.private.security.no-sandbox
+    require_true com.apple.private.security.storage.AppBundles
+    require_true com.apple.private.security.storage.AppDataContainers
+    [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.private.security.container-required' \
+        "$signed_entitlements" 2>/dev/null || true)" == false ]] || {
+        echo "error: signed binary needs com.apple.private.security.container-required = false" >&2
+        exit 65
+    }
+done
 
 installed_size="$(du -sk "$installed_root" | awk '{print $1}')"
 upstream_label="${UPSTREAM_REPO##*/}@${UPSTREAM_REF:0:12}"
