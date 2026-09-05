@@ -141,6 +141,13 @@ architectures="$(lipo -archs "$executable")"
     exit 65
 }
 
+for private_path in "$repository_root" "$src_dir" "$scratch_dir"; do
+    if strings "$executable" | grep -F "$private_path" >/dev/null; then
+        echo "error: $executable embeds private build path: $private_path" >&2
+        exit 65
+    fi
+done
+
 while read -r dependency; do
     case "$dependency" in
     @*) ;;
