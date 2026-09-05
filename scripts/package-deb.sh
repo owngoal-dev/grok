@@ -48,6 +48,11 @@ done
 [[ "$architecture" =~ ^[A-Za-z0-9][A-Za-z0-9-]+$ ]] || { echo "error: invalid architecture" >&2; exit 64; }
 [[ "$install_prefix" =~ ^(/[A-Za-z0-9][A-Za-z0-9._-]*)*$ ]] || { echo "error: invalid install prefix" >&2; exit 64; }
 
+case "$architecture:$install_prefix" in
+iphoneos-arm64:/var/jb | iphoneos-arm64e:) ;;
+*) echo "error: architecture and install prefix name different bootstrap layouts" >&2; exit 64 ;;
+esac
+
 for tool in ldid dpkg-deb; do
     command -v "$tool" >/dev/null || { echo "error: $tool is not installed" >&2; exit 69; }
 done
@@ -114,6 +119,8 @@ require_true() {
 }
 require_true platform-application
 require_true com.apple.private.security.no-sandbox
+require_true com.apple.private.security.storage.AppBundles
+require_true com.apple.private.security.storage.AppDataContainers
 [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.private.security.container-required' \
     "$signed_entitlements" 2>/dev/null || true)" == false ]] || {
     echo "error: signed binary needs com.apple.private.security.container-required = false" >&2
