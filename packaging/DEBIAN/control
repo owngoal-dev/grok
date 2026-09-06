@@ -2,14 +2,10 @@ Package: @PACKAGE_ID@
 Name: grok
 Version: @VERSION@
 Architecture: @ARCHITECTURE@
-Description: Grok Build CLI for jailbroken iOS
- SpaceXAI's terminal coding agent (`grok`), cross-compiled for iOS and
- packaged for both roothide and rootless bootstraps from one arm64 build.
- The architecture field says which layout this package is, not which CPU
- it runs on. Upstream is @UPSTREAM@.
- .
- Run `grok` in a terminal on device. Sign in with an xAI API key or the
- browser flow (`uiopen` must be on PATH).
+Description: The Grok coding agent, on your device
+ Ask for a change in plain language and Grok reads your files, writes the code
+ and runs the commands to make it happen. Run `grok` in a terminal and sign in
+ in the browser or with an xAI API key.
 Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Author: SpaceXAI <https://github.com/xai-org/grok-build>
 Section: Utilities
