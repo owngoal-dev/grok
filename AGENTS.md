@@ -207,7 +207,7 @@ Before recovering a missing Release for an existing tag, peel the tag to its
 commit and require it to equal the checked-out build commit. Never attach
 artifacts built from current branch state to a tag that points somewhere else.
 
-## The OwnGoalPackages contract
+## The owngoal-packages contract
 
 Same as kk: a non-draft, non-prerelease tag `vX.Y.Z`; assets whose names end
 in `iphoneos-arm64.deb` / `iphoneos-arm64e.deb`; a `SHA256SUMS` of bare names.

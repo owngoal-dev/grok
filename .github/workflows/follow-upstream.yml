@@ -6,7 +6,7 @@ name: Follow upstream
 
 on:
   schedule:
-    # Daily 00:00 UTC, ahead of OwnGoalPackages' 04:00 UTC fetch.
+    # Daily 00:00 UTC, ahead of owngoal-packages' 04:00 UTC fetch.
     - cron: "0 0 * * *"
   workflow_dispatch:
 
