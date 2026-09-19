@@ -97,6 +97,7 @@ check:
 	else \
 		echo "    (shellcheck not installed; syntax check only)"; \
 	fi
+	@python3 "$(ROOT_DIR)/scripts/test-select-upstream.py"
 	@echo "==> config"
 	@[[ "$(PACKAGE_VERSION)" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9]+)?$$ ]] || \
 		{ echo "error: version '$(PACKAGE_VERSION)' must look like 1.2.3 or 1.2.3-2" >&2; exit 65; }

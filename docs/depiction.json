@@ -1,0 +1,29 @@
+{
+  "class": "DepictionTabView",
+  "minVersion": "0.4",
+  "tabs": [
+    {
+      "class": "DepictionStackView",
+      "tabname": "Details",
+      "views": [
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Code with Grok in Your Terminal",
+          "useBoldText": true
+        },
+        {
+          "class": "DepictionHeaderView",
+          "title": "Description"
+        },
+        {
+          "class": "DepictionSeparatorView"
+        },
+        {
+          "class": "DepictionMarkdownView",
+          "markdown": "Run `grok` in a terminal to ask for code changes, work with your files, and run project commands. Sign in through your browser or use an xAI API key.\n\n## Compatibility\n\nRequires iOS 15 or later and a jailbroken device with a shell. Choose `iphoneos-arm64e` for roothide or `iphoneos-arm64` for rootless; both packages contain the same arm64 executable.\n\nUpdates are installed through your package manager. Desktop bundled skills and CPU profiling are unavailable on iOS. Clipboard copying uses OSC 52 and requires a compatible terminal.\n\n[View Source](https://github.com/owngoal-dev/grok)",
+          "useSpacing": true
+        }
+      ]
+    }
+  ]
+}

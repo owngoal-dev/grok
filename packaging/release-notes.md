@@ -25,8 +25,11 @@ Verify your download against `SHA256SUMS`.
 
 **Full changelog**: https://github.com/owngoal-dev/grok/commits/@TAG@
 
-This packaging revision updates RootHide compatibility checks and signing.
-CLI startup passes bootstrap paths to payloads that use the physical filesystem;
-RootHide virtual-filesystem utilities retain their official import rewriting.
+This build follows the newest npm-published stable version with a public source
+snapshot at or below npm's latest channel. Some npm versions have no public
+snapshot, so the package version may lag that channel. Patches use narrow code
+anchors to tolerate surrounding upstream comment changes. Package managers can
+show native details and release notes from the published depiction.
+
 RootHide device validation is pending; a successful build is not a claim that
 all interactive runtime paths have been tested.

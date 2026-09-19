@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# Pin this packaging repo to the public source commit matching the newest
-# stable @xai-official/grok npm release. xai-org/grok-build intentionally has
+# Pin this packaging repo to the newest published stable source snapshot
+# at or below the @xai-official/grok npm latest channel. xai-org/grok-build intentionally has
 # no release tags, so the crate's lockstepped version is the source-side join.
 #
 #   scripts/follow-upstream.sh           # update configuration/ if newer
@@ -53,24 +53,15 @@ git -C "$candidate_repo" init --quiet
 git -C "$candidate_repo" remote add origin "$UPSTREAM_REPO"
 git -C "$candidate_repo" fetch --quiet --depth 100 origin refs/heads/main
 
-version_manifest="crates/codegen/xai-grok-version/Cargo.toml"
-upstream_ref=""
-while read -r candidate_ref; do
-    candidate_version="$(
-        git -C "$candidate_repo" show "$candidate_ref:$version_manifest" 2>/dev/null |
-            awk '$0 == "[package]" { in_package = 1; next }
-                 in_package && $1 == "version" { gsub(/"/, "", $3); print $3; exit }'
-    )"
-    if [[ "$candidate_version" == "$upstream_version" ]]; then
-        upstream_ref="$candidate_ref"
-        break
-    fi
-done < <(git -C "$candidate_repo" rev-list FETCH_HEAD)
-
-[[ "$upstream_ref" =~ ^[0-9a-f]{40}$ ]] || {
-    echo "error: no recent public source commit carries stable version $upstream_version" >&2
-    exit 65
-}
+# Public source syncs skip some npm releases. Choose the newest published
+# stable source version no newer than npm's latest channel.
+published_versions="$(npm view @xai-official/grok versions --json)"
+selection="$(printf '%s' "$published_versions" | python3 "$repository_root/scripts/select-upstream.py" "$candidate_repo" "$upstream_version")"
+npm_latest="$upstream_version"
+read -r upstream_version upstream_ref <<<"$selection"
+if [[ "$upstream_version" != "$npm_latest" ]]; then
+    echo "npm latest $npm_latest has no matching public source; selected available stable $upstream_version" >&2
+fi
 
 if [[ "$mode" == "print" ]]; then
     printf '%s %s\n' "$upstream_version" "$upstream_ref"

@@ -1,12 +1,9 @@
 diff --git a/crates/codegen/xai-grok-shell/src/session/workflow/registry.rs b/crates/codegen/xai-grok-shell/src/session/workflow/registry.rs
 --- a/crates/codegen/xai-grok-shell/src/session/workflow/registry.rs
 +++ b/crates/codegen/xai-grok-shell/src/session/workflow/registry.rs
-@@ -16,5 +16,8 @@ pub(crate) const BUILTIN_WORKFLOWS: &[BuiltinWorkflow] = &[BuiltinWorkflow {
-     name: "deep-research",
+@@ -18,2 +18,5 @@ pub(crate) const BUILTIN_WORKFLOWS: &[BuiltinWorkflow] = &[BuiltinWorkflow {
      script: include_str!("../workflows/deep_research.rhai"),
 +    #[cfg(target_os = "ios")]
 +    path: "/src/session/workflows/deep_research.rhai",
 +    #[cfg(not(target_os = "ios"))]
      path: concat!(
-         env!("CARGO_MANIFEST_DIR"),
-         "/src/session/workflows/deep_research.rhai"

@@ -1,10 +1,7 @@
 diff --git a/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs b/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs
 --- a/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs
 +++ b/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs
-@@ -147,15 +147,21 @@ fn resolve_clipboard_route_with(ctx: &TerminalContext, opts: ClipboardRouteOpts)
-     // Linux: always emit OSC 52 as a safety net; other terminal agent CLIs emit OSC 52 on every copy
-     // macOS/Windows: emit only in tmux/SSH/container contexts, or when an upstream `grok wrap` sink is capturing our output
-     // The sink forwards captured OSC 52 to the real clipboard
+@@ -133,4 +133,10 @@ fn resolve_clipboard_route_with(ctx: &TerminalContext, opts: ClipboardRouteOpts)
 +    // iOS: OSC 52 is the only route. A command-line process has no
 +    // pasteboard of its own there (arboard's non-macOS backend is X11/Wayland
 +    // and has nothing to connect to), so the terminal emulator must carry
@@ -15,12 +12,8 @@ diff --git a/crates/codegen/xai-grok-pager-render/src/clipboard/mod.rs b/crates/
          && (cfg!(target_os = "linux")
 +            || is_ios
              || is_tmux
-             || is_remote()
-             || is_container_no_display()
-             || opts.wrap_sink);
+@@ -140,3 +146,3 @@ fn resolve_clipboard_route_with(ctx: &TerminalContext, opts: ClipboardRouteOpts)
      ClipboardRoute {
 -        native: true,
 +        native: !is_ios,
          tmux_buffer: is_tmux,
-         osc52,
-         // Editor :terminal's immediate emulator is libvterm, not tmux, so don't wrap there

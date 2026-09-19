@@ -1,14 +1,10 @@
 diff --git a/crates/codegen/xai-grok-pager-render/src/terminal/mod.rs b/crates/codegen/xai-grok-pager-render/src/terminal/mod.rs
 --- a/crates/codegen/xai-grok-pager-render/src/terminal/mod.rs
 +++ b/crates/codegen/xai-grok-pager-render/src/terminal/mod.rs
-@@ -926,7 +926,9 @@ fn terminal_name_from_term_program(value: &str) -> Option<TerminalName> {
- 
-     match normalized.as_str() {
+@@ -858,3 +858,5 @@ fn terminal_name_from_term_program(value: &str) -> Option<TerminalName> {
          "appleterminal" => Some(TerminalName::AppleTerminal),
 -        "ghostty" => Some(TerminalName::Ghostty),
 +        // iGhostVT (formerly iGhostty) is libghostty's terminal core on
 +        // jailbroken iOS: same OSC 52 and colour capabilities as Ghostty.
 +        "ghostty" | "ighostty" | "ighostvt" => Some(TerminalName::Ghostty),
          "iterm" | "iterm2" | "itermapp" => Some(TerminalName::Iterm2),
-         "warp" | "warpterminal" => Some(TerminalName::WarpTerminal),
-         "vscode" => Some(TerminalName::VsCode),

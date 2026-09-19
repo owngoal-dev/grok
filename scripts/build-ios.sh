@@ -50,6 +50,11 @@ echo "  toolchain: $RUST_TOOLCHAIN" >&2
 command -v rustup >/dev/null || { echo "error: rustup is not installed" >&2; exit 69; }
 rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal >&2
 rustup target add "$rust_target" --toolchain "$RUST_TOOLCHAIN" >&2
+# Select the same compiler for Cargo and nested build-script commands, even
+# when a standalone system Cargo precedes rustup on PATH.
+toolchain_rustc="$(rustup which --toolchain "$RUST_TOOLCHAIN" rustc)"
+PATH="$(dirname "$toolchain_rustc"):$PATH"
+export PATH
 
 export SDKROOT="$sdk_path"
 export IPHONEOS_DEPLOYMENT_TARGET="$MIN_IOS"
@@ -94,7 +99,7 @@ ripgrep_binary="$ripgrep_root/bin/rg"
 if [[ ! -f "$ripgrep_binary" ]]; then
     echo "building ripgrep $tools_rg_version for $rust_target" >&2
     CARGO_TARGET_DIR="$scratch_dir/ripgrep-target" \
-        cargo +"$RUST_TOOLCHAIN" install ripgrep \
+        rustup run "$RUST_TOOLCHAIN" cargo install ripgrep \
             --version "$tools_rg_version" \
             --locked \
             --target "$rust_target" \
@@ -118,7 +123,7 @@ export GROK_SHELL_BUNDLE_RG_PATH="$ripgrep_binary"
 # The vtool check below is the backstop; this is the front.
 (
     cd "$cargo_root"
-    cargo +"$RUST_TOOLCHAIN" build \
+    rustup run "$RUST_TOOLCHAIN" cargo build \
         --release \
         --target "$rust_target" \
         --package "$CARGO_PACKAGE" \

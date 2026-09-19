@@ -189,9 +189,10 @@ exact object from the local checkout; fetch only when the object is absent,
 then still resolve and verify the checked-out commit before patching.
 
 The public source repository has no release tags. Follow the official npm
-`latest` version, then select a recent public source sync whose lockstepped
-`xai-grok-version` crate matches it; validate the full patch stack before
-changing configuration, and never infer stable status from public `main`.
+`latest` version, then select the newest npm-published stable public source
+sync at or below that channel whose lockstepped `xai-grok-version` crate
+matches it. Validate the full patch stack before changing configuration,
+and never infer stable status from public `main`.
 
 For a package-managed iOS executable, disable the product's background
 self-updater and make its manual update command direct users to the jailbreak

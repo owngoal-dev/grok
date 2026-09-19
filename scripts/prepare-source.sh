@@ -63,7 +63,7 @@ else
     echo "fetching $UPSTREAM_REPO at $UPSTREAM_REF"
     git -C "$work_dir" fetch --quiet --depth 1 --force origin "$UPSTREAM_REF"
 fi
-git -C "$work_dir" checkout --quiet --detach "$UPSTREAM_REF"
+git -C "$work_dir" checkout --quiet --force --detach "$UPSTREAM_REF"
 git -C "$work_dir" reset --quiet --hard "$UPSTREAM_REF"
 git -C "$work_dir" clean -qfdx
 

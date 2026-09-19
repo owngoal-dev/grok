@@ -1,9 +1,7 @@
 diff --git a/crates/codegen/xai-grok-agent/src/prompt/skills.rs b/crates/codegen/xai-grok-agent/src/prompt/skills.rs
 --- a/crates/codegen/xai-grok-agent/src/prompt/skills.rs
 +++ b/crates/codegen/xai-grok-agent/src/prompt/skills.rs
-@@ -102,10 +102,14 @@ pub async fn list_skills_with_plugins(
-         &config.server_skill_dirs,
-         SkillScope::Server,
+@@ -109,6 +109,10 @@ pub async fn list_skills_with_plugins(
      ));
 -    skills.extend(collect_injected_skills(
 -        &config.bundled_skill_dirs,
@@ -18,11 +16,7 @@ diff --git a/crates/codegen/xai-grok-agent/src/prompt/skills.rs b/crates/codegen
 +        ));
 +    }
  
-     let mut skills = filter_skills(skills, &config.ignore);
-     skills.sort_by_key(|s| s.scope);
-@@ -309,13 +313,15 @@ async fn list_skills_with_options(
-         );
-     }
+@@ -307,9 +311,11 @@ async fn list_skills_with_options(
  
 -    let bundled_dir = global_dir.join("bundled");
 -    collect_discovered_paths(
@@ -41,28 +35,19 @@ diff --git a/crates/codegen/xai-grok-agent/src/prompt/skills.rs b/crates/codegen
 +        );
 +    }
  
-     parse_skill_files(skill_files)
- }
 diff --git a/crates/codegen/xai-grok-shell/src/agent/mvp_agent/mod.rs b/crates/codegen/xai-grok-shell/src/agent/mvp_agent/mod.rs
 --- a/crates/codegen/xai-grok-shell/src/agent/mvp_agent/mod.rs
 +++ b/crates/codegen/xai-grok-shell/src/agent/mvp_agent/mod.rs
-@@ -2151,6 +2151,9 @@ impl MvpAgent {
-     ///    racing concurrent extracts that would interleave per-file writes
-     ///    against `~/.grok/bundled/` and the manifest.
+@@ -2006,2 +2006,5 @@ impl MvpAgent {
      pub(crate) fn maybe_sync_bundle_in_background(&self, force: bool) {
 +        if cfg!(target_os = "ios") {
 +            return;
 +        }
          use crate::extensions::bundle::{
-             BUNDLE_SYNC_TTL, bundle_cache_is_fresh, has_bundle_credentials,
-             maybe_sync_bundle_to_root,
 diff --git a/crates/codegen/xai-grok-shell/src/config/watcher.rs b/crates/codegen/xai-grok-shell/src/config/watcher.rs
 --- a/crates/codegen/xai-grok-shell/src/config/watcher.rs
 +++ b/crates/codegen/xai-grok-shell/src/config/watcher.rs
-@@ -615,12 +615,19 @@ impl SkillsFileWatcher {
-         // This watcher is shared by the whole leader; per-session compat isn't resolved here, and the discovery gating happens downstream
-         // Watching a currently-disabled vendor dir is harmless: a change just re-runs the gated discovery
-         // It also avoids ever missing a watch if a toggle flips
+@@ -579,1 +579,8 @@ impl SkillsFileWatcher {
 +        let mut compat = xai_grok_tools::types::compat::CompatConfig::default();
 +        // iOS skips Claude/Cursor watches so vendor skill trees cannot add
 +        // open-file load; `.grok` / `.agents` / $GROK_HOME stay.
@@ -71,25 +56,17 @@ diff --git a/crates/codegen/xai-grok-shell/src/config/watcher.rs b/crates/codege
 +            compat.cursor.skills = false;
 +        }
          let dirs_to_watch = xai_grok_agent::prompt::skills::collect_skill_config_dirs(
-             cwd,
-             monorepo_user_dir,
-             &grok_home,
+@@ -583,3 +590,3 @@ impl SkillsFileWatcher {
              config_paths,
 -            xai_grok_tools::types::compat::CompatConfig::default(),
 +            compat,
          );
-         let project_root = cwd.map(crate::session::workflow::registry::project_root);
-         Self::start_with_dirs(&dirs_to_watch, &grok_home, project_root.as_deref())
 diff --git a/crates/codegen/xai-grok-shell/src/extensions/bundle.rs b/crates/codegen/xai-grok-shell/src/extensions/bundle.rs
 --- a/crates/codegen/xai-grok-shell/src/extensions/bundle.rs
 +++ b/crates/codegen/xai-grok-shell/src/extensions/bundle.rs
-@@ -199,6 +199,9 @@ pub(crate) async fn sync_bundle_to_root(
-     alpha_test_key: Option<&str>,
-     _force: bool,
+@@ -189,2 +189,5 @@ pub(crate) async fn sync_bundle_to_root(
  ) -> anyhow::Result<BundleSyncResult> {
 +    if cfg!(target_os = "ios") {
 +        anyhow::bail!("platform bundled skills are not installed on iOS");
 +    }
      if !has_bundle_credentials(auth_manager, deployment_key) {
-         anyhow::bail!(NO_BUNDLE_CREDENTIALS_ERROR);
-     }
