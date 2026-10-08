@@ -1,7 +1,7 @@
 # grok — Agent Notes
 
 [Grok Build](https://github.com/xai-org/grok-build) — SpaceXAI's terminal coding
-agent — built for jailbroken iOS 15+ and installed as `grok`, for both
+agent — built for iOS 15+ on custom firmware and installed as `grok`, for both
 **roothide** and **rootless** bootstraps.
 
 This repository holds **no application source**. It fetches grok-build at a
@@ -195,7 +195,7 @@ matches it. Validate the full patch stack before changing configuration,
 and never infer stable status from public `main`.
 
 For a package-managed iOS executable, disable the product's background
-self-updater and make its manual update command direct users to the jailbreak
+self-updater and make its manual update command direct users to the bootstrap's
 package manager. A downloaded replacement would bypass dpkg's layout,
 entitlement signing, and trust-cache registration even if the bytes could run.
 

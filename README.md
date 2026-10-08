@@ -1,7 +1,7 @@
 # grok
 
 [Grok Build](https://github.com/xai-org/grok-build) — SpaceXAI's terminal coding
-agent — built for jailbroken iOS and installed as `grok`. One arm64 build,
+agent — built for iOS on custom firmware and installed as `grok`. One arm64 build,
 packaged for both **roothide** and **rootless** bootstraps.
 
 ## Install

@@ -1,4 +1,4 @@
-[Grok Build](https://github.com/xai-org/grok-build) — SpaceXAI's terminal coding agent — built for jailbroken iOS and installed as `grok`.
+[Grok Build](https://github.com/xai-org/grok-build) — SpaceXAI's terminal coding agent — built for iOS on custom firmware and installed as `grok`.
 
 ## Which one do I download?
 
@@ -19,7 +19,7 @@ Run `grok` in a terminal on device. Authenticate with an xAI API key or the brow
 
 ## About this build
 
-Upstream [`xai-org/grok-build@@UPSTREAM_SHORT@`](https://github.com/xai-org/grok-build/commit/@UPSTREAM_REF@), plus the patches that port it to a jailbroken iOS userspace. The binary is a Rust executable: it is **not** linked with libvroot, so it has to probe for the bootstrap's shell instead of trusting `/bin/sh`. See [`patches/`](https://github.com/owngoal-dev/grok/tree/@TAG@/patches).
+Upstream [`xai-org/grok-build@@UPSTREAM_SHORT@`](https://github.com/xai-org/grok-build/commit/@UPSTREAM_REF@), plus the patches that port it to an iOS userspace on custom firmware. The binary is a Rust executable: it is **not** linked with libvroot, so it has to probe for the bootstrap's shell instead of trusting `/bin/sh`. See [`patches/`](https://github.com/owngoal-dev/grok/tree/@TAG@/patches).
 
 Verify your download against `SHA256SUMS`.
 
